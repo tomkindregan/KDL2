@@ -1,0 +1,1586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KDL JobPlanner Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a1a2e;--paper:#f5f0e8;--cream:#ede8dc;--rust:#c0392b;--gold:#c9a84c;--steel:#4a5568;--mist:#8899aa;--white:#fff;--green:#2d6a4f;--purple:#5b3fa6;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Mono',monospace;background:var(--paper);color:var(--ink);min-height:100vh;}
+
+/* HEADER */
+.header{background:var(--ink);color:var(--paper);padding:18px 36px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid var(--gold);}
+.brand{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;letter-spacing:-.02em;}
+.brand span{color:var(--gold);}
+.header-sub{font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mist);margin-top:3px;}
+
+/* NAV */
+.nav-tabs{background:#12122a;display:flex;flex-wrap:wrap;border-bottom:3px solid var(--gold);}
+.nav-tab{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;padding:12px 18px;border:none;background:transparent;color:var(--mist);cursor:pointer;transition:all .15s;border-right:1px solid #222244;}
+.nav-tab:hover{color:var(--paper);background:#1e1e3a;}
+.nav-tab.active{color:var(--gold);background:#1e1e3a;border-bottom:3px solid var(--gold);margin-bottom:-3px;}
+.tab-panel{display:none;}.tab-panel.active{display:block;}
+
+/* TOOLBAR */
+.toolbar{background:var(--cream);border-bottom:2px solid var(--ink);padding:10px 36px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;padding:6px 13px;border:2px solid var(--ink);background:transparent;cursor:pointer;font-weight:500;transition:all .13s;white-space:nowrap;}
+.btn:hover{background:var(--ink);color:var(--paper);}
+.btn-p{background:var(--ink);color:var(--paper);}.btn-p:hover{background:var(--rust);border-color:var(--rust);}
+.btn-g{background:var(--gold);border-color:var(--gold);color:var(--ink);}.btn-g:hover{background:#b8963e;border-color:#b8963e;}
+.btn-r{background:var(--rust);border-color:var(--rust);color:var(--paper);}
+.btn-grn{background:var(--green);border-color:var(--green);color:var(--paper);}
+.btn-pur{background:var(--purple);border-color:var(--purple);color:var(--paper);}
+.tsep{width:1px;height:24px;background:var(--mist);margin:0 2px;}
+
+/* MAIN */
+.main{padding:22px 36px;max-width:1400px;margin:0 auto;}
+
+/* JOB CARDS (jobs list view) */
+.jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:20px;}
+.job-card{background:var(--white);border:2px solid var(--ink);padding:18px 20px;position:relative;cursor:pointer;transition:all .15s;}
+.job-card:hover{border-color:var(--gold);box-shadow:4px 4px 0 rgba(0,0,0,.1);}
+.job-card-status{font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);padding:2px 7px;display:inline-block;margin-bottom:8px;}
+.job-card-name{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;}
+.job-card-meta{font-size:.68rem;color:var(--mist);margin-bottom:10px;line-height:1.6;}
+.job-card-progress{height:4px;background:var(--cream);border:1px solid var(--mist);margin-bottom:10px;}
+.job-card-progress-bar{height:100%;background:var(--green);transition:width .3s;}
+.job-card-actions{display:flex;gap:7px;flex-wrap:wrap;}
+
+/* JOB INFO */
+.job-info-card{background:var(--white);border:2px solid var(--ink);margin-bottom:22px;display:grid;grid-template-columns:1fr 1fr 1fr;}
+.ji-block{padding:13px 17px;border-right:2px solid var(--ink);}
+.ji-block:last-child{border-right:none;}
+.ji-label{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);margin-bottom:4px;}
+.ji-input{font-family:'DM Mono',monospace;font-size:.86rem;font-weight:500;border:none;outline:none;background:transparent;width:100%;color:var(--ink);border-bottom:1px dashed var(--mist);padding-bottom:2px;}
+.ji-input::placeholder{color:#ccc;}
+
+/* SECTION TITLE */
+.stitle{font-family:'Fraunces',serif;font-size:.98rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.stitle::after{content:'';flex:1;height:2px;background:var(--ink);}
+.stag{font-family:'DM Mono',monospace;font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:2px 7px;}
+
+/* CREW CARDS */
+.crew-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin-bottom:10px;}
+.crew-card{background:var(--white);border:2px solid var(--ink);padding:12px 14px;position:relative;}
+.role-badge{font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);background:var(--steel);padding:2px 7px;display:inline-block;margin-bottom:7px;}
+.cf{margin-bottom:5px;}
+.cf label{font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:2px;}
+.cf input{font-family:'DM Mono',monospace;font-size:.77rem;border:none;border-bottom:1px dashed var(--mist);outline:none;background:transparent;width:100%;color:var(--ink);}
+.cf input::placeholder{color:#ccc;}
+.xbtn{position:absolute;top:7px;right:7px;background:none;border:none;cursor:pointer;font-size:.9rem;color:var(--mist);}
+.xbtn:hover{color:var(--rust);}
+.add-btn{border:2px dashed var(--mist);background:transparent;padding:11px;cursor:pointer;font-family:'DM Mono',monospace;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);width:100%;transition:all .13s;}
+.add-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--cream);}
+
+/* SCHEDULE TABLE */
+.sched-wrap{margin-bottom:24px;overflow-x:auto;}
+.sched-table{width:100%;border-collapse:collapse;border:2px solid var(--ink);}
+.sched-table thead{background:var(--ink);color:var(--paper);}
+.sched-table th{font-size:.59rem;letter-spacing:.16em;text-transform:uppercase;padding:9px 12px;text-align:left;font-weight:500;border-right:1px solid rgba(255,255,255,.15);}
+.sched-table td{padding:0;border-bottom:1px solid var(--cream);border-right:1px solid var(--cream);vertical-align:top;}
+.sched-table td input,.sched-table td textarea,.sched-table td select{font-family:'DM Mono',monospace;font-size:.74rem;border:none;outline:none;background:transparent;width:100%;color:var(--ink);padding:7px 10px;resize:none;}
+.sched-table td textarea{min-height:36px;}
+.sched-table tr:hover td{background:#fdf8f0;}
+.sched-table tr.done-row td{background:#f0faf4;opacity:.7;}
+.ssel{font-size:.62rem!important;padding:7px 5px!important;}
+.cd{width:108px;}.ca{min-width:240px;}.cb{width:190px;}.cs{width:122px;}.cn{width:160px;}.cx{width:40px;text-align:center;}
+.add-row-btn{background:var(--cream);border:none;width:100%;font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);padding:8px;cursor:pointer;border-top:2px dashed var(--mist);transition:all .13s;display:block;}
+.add-row-btn:hover{background:var(--ink);color:var(--paper);}
+
+/* ASSIGNEE */
+.acell{padding:4px 6px!important;vertical-align:top;}
+.atags{display:flex;flex-wrap:wrap;gap:3px;min-height:22px;cursor:pointer;padding:2px 4px;}
+.atag{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.04em;text-transform:uppercase;padding:2px 5px;display:flex;align-items:center;gap:2px;white-space:nowrap;}
+.atag.crew{background:var(--steel);color:var(--paper);}
+.atag.sub{background:var(--rust);color:var(--paper);}
+.atag .tx{cursor:pointer;opacity:.7;font-size:.65rem;}
+.atag .tx:hover{opacity:1;}
+.aph{font-size:.69rem;color:#ccc;padding:2px;}
+.adrop{position:fixed;z-index:700;background:var(--white);border:2px solid var(--ink);min-width:190px;max-height:250px;overflow-y:auto;box-shadow:4px 4px 0 rgba(0,0,0,.13);}
+.adrop .dgl{font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);padding:6px 10px 3px;background:var(--cream);}
+.adrop .dopt{padding:7px 10px;font-size:.72rem;cursor:pointer;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--cream);transition:background .1s;}
+.adrop .dopt:hover{background:var(--cream);}
+.adrop .dopt.sel{background:#eef2ff;}
+.adrop .dopt .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.adrop .dopt .chk{margin-left:auto;color:var(--green);}
+
+/* TASK SHEETS */
+.sub-tbl{width:100%;border-collapse:collapse;border:2px solid var(--ink);margin-bottom:10px;}
+.sub-tbl th{background:var(--steel);color:var(--paper);font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;padding:7px 10px;text-align:left;}
+.sub-tbl td{border-bottom:1px solid var(--cream);border-right:1px solid var(--cream);padding:0;}
+.sub-tbl td input{font-family:'DM Mono',monospace;font-size:.74rem;border:none;outline:none;background:transparent;width:100%;color:var(--ink);padding:6px 10px;}
+.sub-tbl tr:hover td{background:#f8f5ff;}
+
+/* FILES */
+.files-list{border:2px solid var(--ink);background:var(--white);margin-bottom:10px;}
+.file-item{padding:10px 14px;border-bottom:1px solid var(--cream);display:flex;align-items:center;gap:10px;}
+.file-item:last-child{border-bottom:none;}
+.file-icon{font-size:1.1rem;flex-shrink:0;}
+.file-name{font-size:.78rem;font-weight:500;flex:1;}
+.file-desc{font-size:.66rem;color:var(--mist);}
+.file-actions{display:flex;gap:6px;}
+
+/* COMPLETED JOBS */
+.comp-card{background:var(--white);border:2px solid var(--green);padding:14px 18px;margin-bottom:9px;display:flex;align-items:center;gap:14px;}
+.comp-info{flex:1;}
+.comp-name{font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;}
+.comp-meta{font-size:.67rem;color:var(--mist);margin-top:2px;}
+.comp-badge{background:var(--green);color:white;font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;padding:2px 7px;display:inline-block;margin-bottom:6px;}
+.comp-actions{display:flex;gap:7px;}
+
+/* DB / LIBRARY */
+.db-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(285px,1fr));gap:11px;margin-bottom:16px;}
+.dbc{background:var(--white);border:2px solid var(--ink);padding:12px 14px;position:relative;}
+.dbb{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);padding:2px 6px;display:inline-block;margin-bottom:6px;}
+.dbn{font-family:'Fraunces',serif;font-size:.93rem;font-weight:700;margin-bottom:3px;}
+.dbd{font-size:.68rem;color:var(--steel);margin-bottom:2px;}
+.dba{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+
+.cat-chip{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:4px 10px;border:2px solid var(--ink);background:transparent;cursor:pointer;transition:all .11s;}
+.cat-chip:hover,.cat-chip.on{background:var(--ink);color:var(--paper);}
+.task-cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.tlib{border:2px solid var(--ink);background:var(--white);max-height:350px;overflow-y:auto;}
+.tli{padding:8px 12px;border-bottom:1px solid var(--cream);display:flex;align-items:center;gap:8px;cursor:pointer;transition:background .1s;}
+.tli:hover{background:var(--cream);}
+.tli-cat{font-size:.52rem;letter-spacing:.15em;text-transform:uppercase;color:var(--white);padding:2px 5px;white-space:nowrap;}
+.tli-txt{font-size:.77rem;flex:1;}
+.tli-add{font-size:.66rem;color:var(--green);font-weight:500;white-space:nowrap;}
+
+/* CONTRACTOR VIEW */
+.cv-header{background:var(--ink);color:var(--paper);padding:22px 28px;border-bottom:4px solid var(--gold);}
+.cv-task{background:var(--white);border:2px solid var(--ink);padding:14px 18px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;}
+.cv-task.done{background:#f0faf4;border-color:var(--green);opacity:.8;}
+.cv-tick{width:26px;height:26px;border:2px solid var(--ink);border-radius:3px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .15s;margin-top:2px;}
+.cv-tick:hover{background:var(--cream);}
+.cv-tick.ticked{background:var(--green);border-color:var(--green);color:white;}
+.cv-info{flex:1;}
+.cv-date{font-size:.64rem;color:var(--mist);margin-bottom:3px;}
+.cv-task-txt{font-size:.84rem;font-weight:500;}
+.cv-notes{font-size:.7rem;color:var(--steel);margin-top:4px;}
+
+/* MODALS */
+.mo{display:none;position:fixed;inset:0;background:rgba(26,26,46,.78);z-index:1000;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.modal{background:var(--paper);border:3px solid var(--ink);width:600px;max-width:96vw;max-height:92vh;overflow-y:auto;}
+.modal-lg{width:760px;}
+.mh{background:var(--ink);color:var(--paper);padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}
+.mh h2{font-family:'Fraunces',serif;font-size:1rem;}
+.mc-btn{background:none;border:none;color:var(--paper);font-size:1.2rem;cursor:pointer;}
+.mb{padding:20px;}
+.ff{margin-bottom:11px;}
+.ff label{font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:4px;}
+.ff input,.ff select,.ff textarea{font-family:'DM Mono',monospace;font-size:.8rem;border:2px solid var(--ink);background:var(--white);padding:6px 10px;width:100%;outline:none;color:var(--ink);resize:vertical;}
+.share-pre{border:2px solid var(--ink);background:var(--white);padding:14px;margin-bottom:12px;font-size:.72rem;line-height:1.8;white-space:pre-wrap;max-height:260px;overflow-y:auto;}
+.spre-title{font-family:'Fraunces',serif;font-size:.9rem;margin-bottom:8px;border-bottom:1px solid var(--ink);padding-bottom:5px;}
+
+/* MISC */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:24px;}
+.footer-tip{background:var(--ink);color:var(--mist);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;padding:10px 36px;text-align:center;border-top:2px solid var(--gold);}
+.footer-tip strong{color:var(--gold);}
+.bc{display:inline-block;background:var(--rust);color:white;font-size:.51rem;border-radius:8px;padding:1px 5px;margin-left:3px;vertical-align:middle;}
+.bc-grn{background:var(--green);}
+@keyframes fs{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.nr{animation:fs .2s ease;}
+@media(max-width:900px){
+  .two-col{grid-template-columns:1fr;}
+  .job-info-card{grid-template-columns:1fr;}
+  .ji-block{border-right:none;border-bottom:2px solid var(--ink);}
+  .ji-block:last-child{border-bottom:none;}
+  .header,.toolbar,.main{padding-left:12px;padding-right:12px;}
+}
+@media print{
+  .nav-tabs,.toolbar,.xbtn,.add-row-btn,.add-btn,.mo,.tab-panel:not(.active){display:none!important;}
+  body{background:white;}
+}
+
+/* Progress ring on job cards */
+.prog-text{font-size:.62rem;color:var(--mist);margin-top:2px;}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+
+/* Colour tags */
+.colour-picker{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.colour-swatch{width:22px;height:22px;border-radius:3px;border:2px solid transparent;cursor:pointer;transition:transform .1s;}
+.colour-swatch:hover{transform:scale(1.2);}
+.colour-swatch.selected{border-color:var(--ink);transform:scale(1.15);}
+.job-colour-bar{height:5px;width:100%;position:absolute;top:0;left:0;}
+
+/* Due date warnings */
+.due-warn{font-size:.62rem;font-weight:500;padding:2px 7px;display:inline-block;margin-top:5px;}
+.due-overdue{background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;}
+.due-soon{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.due-ok{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7;}
+
+/* Drive link in job info */
+.drive-block{background:#f0f7ff;border-top:2px solid var(--ink);padding:10px 17px;grid-column:1/-1;display:flex;align-items:center;gap:10px;}
+.drive-block a{font-size:.78rem;color:#1a56db;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.drive-block a:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div style="display:flex;align-items:center;gap:16px;">
+    <img src="data:image/jpeg;base64,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" alt="KDL Retail Interiors" style="height:62px;width:62px;object-fit:cover;flex-shrink:0;" />
+    <div>
+      <div class="brand">KDL <span>Retail Interiors</span></div>
+      <div class="header-sub">Site Schedule · Crew Coordinator · Task Manager</div>
+    </div>
+  </div>
+  <div style="text-align:right;">
+    <div style="font-size:.56rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mist);">Last saved</div>
+    <div id="last-saved" style="font-size:.74rem;color:var(--gold);">Never</div>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showTab('jobs',this)">🏗 Active Jobs <span class="bc bc-grn" id="bc-jobs">0</span></button>
+  <button class="nav-tab" onclick="showTab('completed',this)">✅ Completed Jobs <span class="bc bc-grn" id="bc-comp">0</span></button>
+  <button class="nav-tab" onclick="showTab('contacts',this)">👥 Contacts DB <span class="bc" id="bc-ct">0</span></button>
+  <button class="nav-tab" onclick="showTab('tasks',this)">📚 Task Library <span class="bc" id="bc-tk">0</span></button>
+</div>
+
+<!-- ===== JOBS TAB ===== -->
+<div class="tab-panel active" id="tab-jobs">
+  <div class="toolbar">
+    <button class="btn btn-p" onclick="openNewJobModal()">⊕ New Job</button>
+    <div class="tsep"></div>
+    <span style="font-size:.66rem;color:var(--steel);">Click a job card to open it</span>
+  </div>
+  <div class="main">
+    <div class="stitle"><span class="stag">Active</span> Current Jobs</div>
+    <div class="jobs-grid" id="jobs-grid"></div>
+  </div>
+</div>
+
+<!-- ===== JOB EDITOR (shown when a job is open) ===== -->
+<div class="tab-panel" id="tab-editor">
+  <div class="toolbar" id="editor-toolbar">
+    <button class="btn" onclick="closeEditor()">← All Jobs</button>
+    <button class="btn" onclick="addScheduleRow()">+ Add Task</button>
+    <button class="btn" onclick="openTaskPicker()">📚 From Library</button>
+    <button class="btn" onclick="openAddFromDB('crew')">+ From Contacts</button>
+    <div class="tsep"></div>
+    <button class="btn btn-g" onclick="openShareModal()">↗ Share Tasks</button>
+    <button class="btn btn-pur" onclick="openContractorLink()">🔗 Contractor Link</button>
+    <button class="btn btn-grn" onclick="openShareLink()">🔗 Share Job Link</button>
+    <div class="tsep"></div>
+    <button class="btn" onclick="window.print()">⎙ Print</button>
+    <button class="btn" onclick="saveNow()">💾 Save</button>
+    <button class="btn btn-r" onclick="markComplete()">✅ Mark Complete</button>
+  </div>
+  <div class="main">
+    <!-- Job Info -->
+    <div class="job-info-card" id="job-info-card">
+      <div class="ji-block"><div class="ji-label">Job Name</div><input class="ji-input" id="jn" placeholder="e.g. Cobh Retail Fit-Out" oninput="debounceSave()" /></div>
+      <div class="ji-block"><div class="ji-label">Location</div><input class="ji-input" id="jl" placeholder="Site address" oninput="debounceSave()" /></div>
+      <div class="ji-block"><div class="ji-label">Project Manager</div><input class="ji-input" id="jpm" placeholder="Your name" oninput="debounceSave()" /></div>
+      <div class="ji-block"><div class="ji-label">Start Date</div><input class="ji-input" id="jstart" type="date" oninput="debounceSave()" /></div>
+      <div class="ji-block"><div class="ji-label">End Date (Target)</div><input class="ji-input" id="jend" type="date" oninput="debounceSave()" /></div>
+      <div class="ji-block"><div class="ji-label">Notes / Special Instructions</div><input class="ji-input" id="jnotes" placeholder="Access codes, client contact..." oninput="debounceSave()" /></div>
+      <div class="ji-block" style="grid-column:1/-1;border-right:none;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:260px;">
+          <div class="ji-label">📁 Google Drive / Dropbox Folder Link</div>
+          <input class="ji-input" id="jdrive" placeholder="Paste Google Drive or Dropbox folder link…" oninput="debounceSave()" style="border-bottom-color:var(--steel);" />
+        </div>
+        <div id="jdrive-open" style="display:none;">
+          <a id="jdrive-link" href="#" target="_blank" class="btn btn-p" style="text-decoration:none;font-size:.62rem;padding:4px 11px;">📂 Open Folder</a>
+        </div>
+        <div>
+          <div class="ji-label">Job Colour Tag</div>
+          <div class="colour-picker" id="colour-picker"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crew & Subs -->
+    <div class="two-col">
+      <div>
+        <div class="stitle"><span class="stag">Crew</span> Work Team</div>
+        <div class="crew-grid" id="crew-cont"></div>
+        <div style="display:flex;gap:7px;">
+          <button class="add-btn" style="flex:1" onclick="addCrew()">+ New Member</button>
+          <button class="add-btn" style="flex:1" onclick="openAddFromDB('crew')">+ From Contacts</button>
+        </div>
+      </div>
+      <div>
+        <div class="stitle"><span class="stag" style="background:var(--rust)">Sub</span> Sub-Contractors</div>
+        <div class="crew-grid" id="sub-cont"></div>
+        <div style="display:flex;gap:7px;">
+          <button class="add-btn" style="flex:1" onclick="addSub()">+ New Sub</button>
+          <button class="add-btn" style="flex:1" onclick="openAddFromDB('sub')">+ From Contacts</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="stitle"><span class="stag">Schedule</span> Master Task Timeline</div>
+    <div class="sched-wrap">
+      <table class="sched-table">
+        <thead><tr>
+          <th class="cd">Date / Time</th><th class="ca">Task / Action</th>
+          <th class="cb">Assigned To</th><th class="cs">Status</th>
+          <th class="cn">Notes</th><th class="cx"></th>
+        </tr></thead>
+        <tbody id="sched-body"></tbody>
+      </table>
+      <button class="add-row-btn" onclick="addScheduleRow()">+ Add Row</button>
+    </div>
+
+    <!-- Files -->
+    <div class="stitle"><span class="stag" style="background:var(--purple)">Files</span> Documents &amp; Drawings</div>
+    <div id="files-section" style="margin-bottom:24px;">
+      <div class="files-list" id="files-list"></div>
+      <button class="add-btn" onclick="openAddFileModal()" style="margin-top:8px;">+ Add File / Drawing Link</button>
+    </div>
+
+    <!-- Task Sheets -->
+    <div class="stitle"><span class="stag">Sheets</span> Individual Task Breakdown</div>
+    <div id="task-sheets"></div>
+  </div>
+</div>
+
+<!-- ===== COMPLETED JOBS TAB ===== -->
+<div class="tab-panel" id="tab-completed">
+  <div class="toolbar"><span style="font-size:.7rem;color:var(--steel);">Jobs marked as complete — reopen, view, or delete them here.</span></div>
+  <div class="main">
+    <div class="stitle"><span class="stag" style="background:var(--green)">Complete</span> Completed Jobs</div>
+    <div id="completed-list"></div>
+  </div>
+</div>
+
+<!-- ===== CONTACTS TAB ===== -->
+<div class="tab-panel" id="tab-contacts">
+  <div class="toolbar">
+    <button class="btn btn-p" onclick="openContactModal('crew','')">+ Add Crew Contact</button>
+    <button class="btn btn-r" onclick="openContactModal('sub','')">+ Add Sub-Contractor</button>
+    <div class="tsep"></div>
+    <input id="csearch" placeholder="Search contacts..." style="font-family:'DM Mono',monospace;font-size:.74rem;border:2px solid var(--ink);padding:5px 10px;background:white;outline:none;" oninput="renderContacts()" />
+  </div>
+  <div class="main">
+    <div class="two-col">
+      <div><div class="stitle"><span class="stag" style="background:var(--steel)">Crew</span> Work Team Contacts</div><div id="db-crew"></div></div>
+      <div><div class="stitle"><span class="stag" style="background:var(--rust)">Sub</span> Sub-Contractor Contacts</div><div id="db-sub"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TASK LIBRARY TAB ===== -->
+<div class="tab-panel" id="tab-tasks">
+  <div class="toolbar">
+    <button class="btn btn-p" onclick="openTaskModal('')">+ Add Task to Library</button>
+    <div class="tsep"></div>
+    <input id="tsearch" placeholder="Search tasks..." style="font-family:'DM Mono',monospace;font-size:.74rem;border:2px solid var(--ink);padding:5px 10px;background:white;outline:none;" oninput="renderTaskLib()" />
+  </div>
+  <div class="main">
+    <div class="stitle"><span class="stag">Library</span> Saved Tasks</div>
+    <div class="task-cats" id="lib-cats"></div>
+    <div class="tlib" id="lib-list"></div>
+  </div>
+</div>
+
+<!-- ===== CONTRACTOR VIEW (shown when ?contractor=... in URL) ===== -->
+<div id="contractor-view" style="display:none;">
+  <div class="cv-header">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:1.4rem;font-weight:700;">KDL <span style="color:var(--gold)">Retail Interiors</span></div>
+        <div style="font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mist);margin-top:2px;">Contractor Task Sheet</div>
+      </div>
+    </div>
+    <div id="cv-job-info" style="margin-top:12px;font-size:.8rem;color:var(--mist);"></div>
+  </div>
+  <div style="padding:22px 28px;max-width:800px;margin:0 auto;">
+    <div id="cv-name-banner" style="background:var(--steel);color:white;padding:12px 18px;margin-bottom:18px;font-family:'Fraunces',serif;font-size:1.1rem;"></div>
+    <div id="cv-tasks-list"></div>
+    <div style="margin-top:20px;padding:14px 18px;background:var(--cream);border:2px solid var(--ink);">
+      <div style="font-size:.64rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mist);margin-bottom:8px;">When done — send your updates back</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-p" onclick="cvCopyLink()">📋 Copy Update Link</button>
+        <button class="btn" onclick="cvWhatsApp()">WhatsApp Update</button>
+        <button class="btn" onclick="cvEmail()">Email Update</button>
+      </div>
+      <div style="font-size:.65rem;color:var(--mist);margin-top:8px;">The update link contains your task completions. Send it to your project manager — they click it to sync.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- New Job -->
+<div class="mo" id="m-newjob">
+  <div class="modal"><div class="mh"><h2>Create New Job</h2><button class="mc-btn" onclick="cm('m-newjob')">✕</button></div>
+  <div class="mb">
+    <div class="ff"><label>Job Name *</label><input id="nj-name" placeholder="e.g. Cork City Fit-Out" /></div>
+    <div class="ff"><label>Location</label><input id="nj-loc" placeholder="Site address" /></div>
+    <div class="ff"><label>Project Manager</label><input id="nj-pm" placeholder="Your name" /></div>
+    <div class="ff" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div><label>Start Date</label><input type="date" id="nj-start" /></div>
+      <div><label>End Date</label><input type="date" id="nj-end" /></div>
+    </div>
+    <div class="ff"><label>📁 Google Drive / Dropbox Folder Link (optional)</label><input id="nj-drive" placeholder="Paste folder link…" /></div>
+    <div class="ff"><label>Job Colour Tag</label><div class="colour-picker" id="nj-colour-picker"></div><input type="hidden" id="nj-colour" value="" /></div>
+    <div style="margin:12px 0;padding:10px 12px;background:var(--cream);border:1px solid var(--mist);font-size:.72rem;color:var(--steel);">
+      💡 You can carry over crew from an existing active job to save time.
+    </div>
+    <div class="ff"><label>Copy crew from existing job (optional)</label>
+      <select id="nj-copy-from"><option value="">— Start fresh —</option></select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button class="btn btn-p" onclick="createNewJob()">Create Job</button>
+      <button class="btn" onclick="cm('m-newjob')">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Share Tasks Modal -->
+<div class="mo" id="m-share">
+  <div class="modal"><div class="mh"><h2>Share Tasks with Crew</h2><button class="mc-btn" onclick="cm('m-share')">✕</button></div>
+  <div class="mb">
+    <div class="ff"><label>Select Person</label><select id="share-sel" onchange="updateSharePre()"></select></div>
+    <div class="share-pre" id="share-pre">Select a person above…</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-p" onclick="copyShare()">Copy to Clipboard</button>
+      <button class="btn" onclick="emailShare()">Open in Email</button>
+      <button class="btn" onclick="waShare()">WhatsApp</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Contractor Link Modal -->
+<div class="mo" id="m-contractor">
+  <div class="modal"><div class="mh"><h2>🔗 Contractor Task Link</h2><button class="mc-btn" onclick="cm('m-contractor')">✕</button></div>
+  <div class="mb">
+    <p style="font-size:.76rem;line-height:1.7;margin-bottom:14px;color:var(--steel);">Generate a personalised link for a contractor. They open it, see only their tasks, and can tick them complete. You then click their reply link to sync the updates.</p>
+    <div class="ff"><label>Select Contractor / Crew Member</label>
+      <select id="cv-person-sel" onchange="updateContractorLink()"></select>
+    </div>
+    <div style="background:var(--cream);border:2px solid var(--ink);padding:11px 13px;margin-bottom:12px;">
+      <div style="font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);margin-bottom:5px;">Contractor Link</div>
+      <div id="cv-link-url" style="font-size:.7rem;word-break:break-all;color:var(--ink);line-height:1.5;max-height:70px;overflow-y:auto;"></div>
+    </div>
+    <div style="font-size:.67rem;color:var(--mist);margin-bottom:12px;" id="cv-task-count"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-p" onclick="copyContractorLink()">📋 Copy Link</button>
+      <button class="btn" onclick="waContractorLink()">WhatsApp</button>
+      <button class="btn" onclick="emailContractorLink()">Email</button>
+    </div>
+    <div style="margin-top:14px;padding:10px 12px;background:#fff8e6;border:1px solid var(--gold);font-size:.67rem;color:var(--steel);line-height:1.6;">
+      ⚠️ When the contractor ticks tasks and sends back their update link — paste it into your browser address bar to sync the completions.
+    </div>
+  </div></div>
+</div>
+
+<!-- Share Job Link Modal -->
+<div class="mo" id="m-sharelink">
+  <div class="modal"><div class="mh"><h2>🔗 Share Full Job Link</h2><button class="mc-btn" onclick="cm('m-sharelink')">✕</button></div>
+  <div class="mb">
+    <p style="font-size:.76rem;line-height:1.7;margin-bottom:14px;color:var(--steel);">Anyone with this link can open the full job in their browser — no account needed.</p>
+    <div style="background:var(--cream);border:2px solid var(--ink);padding:11px 13px;margin-bottom:12px;">
+      <div style="font-size:.56rem;letter-spacing:.18em;text-transform:uppercase;color:var(--mist);margin-bottom:5px;">Shareable Link</div>
+      <div id="share-link-url" style="font-size:.7rem;word-break:break-all;color:var(--ink);line-height:1.5;max-height:70px;overflow-y:auto;"></div>
+    </div>
+    <div id="share-link-size" style="font-size:.66rem;color:var(--mist);margin-bottom:12px;"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn btn-p" id="copy-link-btn" onclick="copyShareLink()">📋 Copy Link</button>
+      <button class="btn" onclick="waShareLink()">WhatsApp</button>
+      <button class="btn" onclick="emailShareLink()">Email Link</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Add Contact Modal -->
+<div class="mo" id="m-contact">
+  <div class="modal"><div class="mh"><h2 id="m-contact-title">Add Contact</h2><button class="mc-btn" onclick="cm('m-contact')">✕</button></div>
+  <div class="mb">
+    <input type="hidden" id="ct-type" /><input type="hidden" id="ct-id" />
+    <div class="ff"><label>Name / Company</label><input id="ct-name" placeholder="Full name or company" /></div>
+    <div class="ff"><label>Role / Trade</label><input id="ct-role" placeholder="e.g. Electrician, Site Foreman" /></div>
+    <div class="ff"><label>Phone</label><input id="ct-phone" placeholder="+353..." /></div>
+    <div class="ff"><label>Email</label><input id="ct-email" placeholder="email@example.com" /></div>
+    <div class="ff"><label>Notes</label><input id="ct-notes" placeholder="Any extra info..." /></div>
+    <div style="display:flex;gap:8px;"><button class="btn btn-p" onclick="saveContact()">Save Contact</button><button class="btn" onclick="cm('m-contact')">Cancel</button></div>
+  </div></div>
+</div>
+
+<!-- Add From DB Modal -->
+<div class="mo" id="m-fromdb">
+  <div class="modal modal-lg"><div class="mh"><h2 id="m-fromdb-title">Add from Contacts</h2><button class="mc-btn" onclick="cm('m-fromdb')">✕</button></div>
+  <div class="mb">
+    <p style="font-size:.73rem;color:var(--mist);margin-bottom:12px;">Tick the people to add to this job.</p>
+    <div id="fromdb-list"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;">
+      <button class="btn btn-p" onclick="confirmFromDB()">Add Selected</button>
+      <button class="btn" onclick="cm('m-fromdb')">Cancel</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- Task Picker Modal -->
+<div class="mo" id="m-picker">
+  <div class="modal modal-lg"><div class="mh"><h2>Add Tasks from Library</h2><button class="mc-btn" onclick="cm('m-picker')">✕</button></div>
+  <div class="mb">
+    <p style="font-size:.73rem;color:var(--mist);margin-bottom:10px;">Click any task to add it to the schedule.</p>
+    <div class="task-cats" id="picker-cats"></div>
+    <div class="tlib" id="picker-list"></div>
+    <div style="margin-top:12px;"><button class="btn btn-p" onclick="cm('m-picker')">Done</button></div>
+  </div></div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="mo" id="m-task">
+  <div class="modal"><div class="mh"><h2 id="m-task-title">Add Task to Library</h2><button class="mc-btn" onclick="cm('m-task')">✕</button></div>
+  <div class="mb">
+    <input type="hidden" id="te-id" />
+    <div class="ff"><label>Task Description</label><textarea id="te-desc" rows="3" placeholder="Describe the task..."></textarea></div>
+    <div class="ff"><label>Category</label><input id="te-cat" placeholder="e.g. Electrical, Flooring, Demo..." list="cat-dl" /><datalist id="cat-dl"></datalist></div>
+    <div class="ff"><label>Default Assignee (optional)</label><input id="te-ass" placeholder="e.g. Electrician, KDL..." /></div>
+    <div style="display:flex;gap:8px;"><button class="btn btn-p" onclick="saveTask()">Save Task</button><button class="btn" onclick="cm('m-task')">Cancel</button></div>
+  </div></div>
+</div>
+
+<!-- Add File Modal -->
+<div class="mo" id="m-file">
+  <div class="modal"><div class="mh"><h2>Add File / Drawing Link</h2><button class="mc-btn" onclick="cm('m-file')">✕</button></div>
+  <div class="mb">
+    <input type="hidden" id="fe-id" />
+    <div class="ff"><label>File Name / Label</label><input id="fe-name" placeholder="e.g. Floor Plan Rev 3, Site Survey..." /></div>
+    <div class="ff"><label>Link URL</label><input id="fe-url" placeholder="https://drive.google.com/... or Dropbox link" /></div>
+    <div class="ff"><label>Type</label>
+      <select id="fe-type">
+        <option value="📐">📐 Drawing / Plan</option>
+        <option value="📄">📄 Document</option>
+        <option value="📸">📸 Photo</option>
+        <option value="📊">📊 Spreadsheet</option>
+        <option value="📋">📋 Other</option>
+      </select>
+    </div>
+    <div class="ff"><label>Notes (optional)</label><input id="fe-notes" placeholder="e.g. Rev 3 approved 10/03" /></div>
+    <div style="display:flex;gap:8px;"><button class="btn btn-p" onclick="saveFile()">Save File</button><button class="btn" onclick="cm('m-file')">Cancel</button></div>
+  </div></div>
+</div>
+
+<!-- Imported job banner -->
+<div id="import-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:2000;background:var(--green);color:white;padding:12px 22px;font-family:'DM Mono',monospace;font-size:.73rem;display:flex;align-items:center;gap:14px;">
+  <span>📩 <strong>Shared job loaded!</strong> <span id="import-banner-name"></span></span>
+  <button onclick="saveNow();document.getElementById('import-banner').style.display='none';" style="background:white;border:none;color:var(--green);font-family:'DM Mono',monospace;font-size:.68rem;padding:4px 11px;cursor:pointer;font-weight:500;">💾 Save</button>
+  <button onclick="document.getElementById('import-banner').style.display='none';" style="background:transparent;border:2px solid rgba(255,255,255,.5);color:white;font-family:'DM Mono',monospace;font-size:.68rem;padding:4px 9px;cursor:pointer;">×</button>
+</div>
+
+<div class="footer-tip"><strong>KDL JobPlanner Pro</strong> · Multiple Active Jobs · Contacts DB · Task Library · Contractor Links · File Storage</div>
+
+<script>
+// ============================================================
+//  CORE STATE
+// ============================================================
+let jobs = [];          // array of job objects {id, name, location, pm, start, end, notes, crew, subs, rows, files, status, createdAt, completedAt}
+let completedJobs = []; // same structure, status='complete'
+let contacts = [];
+let taskLibrary = [];
+let currentJobId = null;
+
+let jobIdCounter = 0, contactIdCounter = 0, taskIdCounter = 0;
+let rowIdCounter = 0, crewIdCounter = 0, subIdCounter = 0, fileIdCounter = 0;
+
+let fromDBtype = 'crew', pickerCat = 'ALL', libCat = 'ALL';
+let openDrop = null;
+let saveTimer = null;
+
+// ============================================================
+//  CURRENT JOB HELPERS
+// ============================================================
+function getJob(id) { return jobs.find(j => j.id === id); }
+function currentJob() { return getJob(currentJobId); }
+
+function jobField(field) {
+  const j = currentJob(); return j ? j[field] : null;
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+window.addEventListener('load', () => {
+  loadAll();
+
+  // Check for contractor view first
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('contractor')) {
+    loadContractorView(params.get('contractor'));
+    return;
+  }
+  if (params.get('job')) {
+    setTimeout(() => checkURLImport(params.get('job')), 100);
+  }
+  if (params.get('update')) {
+    setTimeout(() => applyContractorUpdate(params.get('update')), 100);
+  }
+
+  if (taskLibrary.length === 0) seedTasks();
+  renderJobsGrid();
+  badges();
+  setInterval(persist, 25000);
+});
+
+// ============================================================
+//  TAB SWITCHING
+// ============================================================
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'completed') renderCompleted();
+  if (name === 'contacts') renderContacts();
+  if (name === 'tasks') renderTaskLib();
+  badges();
+}
+
+function openEditor(jobId) {
+  currentJobId = jobId;
+  // Switch to editor tab
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-editor').classList.add('active');
+  loadJobIntoEditor(jobId);
+}
+
+function closeEditor() {
+  saveCurrentJobFromEditor();
+  currentJobId = null;
+  showTab('jobs', document.querySelectorAll('.nav-tab')[0]);
+  renderJobsGrid();
+}
+
+function loadJobIntoEditor(jobId) {
+  const j = getJob(jobId); if (!j) return;
+  document.getElementById('jn').value = j.name || '';
+  document.getElementById('jl').value = j.location || '';
+  document.getElementById('jpm').value = j.pm || '';
+  document.getElementById('jstart').value = j.start || '';
+  document.getElementById('jend').value = j.end || '';
+  document.getElementById('jnotes').value = j.notes || '';
+  document.getElementById('jdrive').value = j.driveLink || '';
+  updateDriveButton();
+  renderColourPicker('colour-picker', j.colour || '', (c) => { const jj=currentJob(); if(jj){jj.colour=c;} debounceSave(); renderJobsGrid(); });
+  renderCrew(); renderSubs(); renderSchedule(); renderFiles();
+  renderShareOpts(); renderSheets();
+}
+
+function saveCurrentJobFromEditor() {
+  const j = currentJob(); if (!j) return;
+  j.name = document.getElementById('jn').value;
+  j.location = document.getElementById('jl').value;
+  j.pm = document.getElementById('jpm').value;
+  j.start = document.getElementById('jstart').value;
+  j.end = document.getElementById('jend').value;
+  j.notes = document.getElementById('jnotes').value;
+  j.driveLink = document.getElementById('jdrive').value;
+  // colour is saved directly by the swatch click handler
+}
+
+function syncJobMeta() {
+  const j = currentJob(); if (!j) return;
+  j.name = document.getElementById('jn').value;
+  j.location = document.getElementById('jl').value;
+  j.pm = document.getElementById('jpm').value;
+  j.start = document.getElementById('jstart').value;
+  j.end = document.getElementById('jend').value;
+  j.notes = document.getElementById('jnotes').value;
+  j.driveLink = document.getElementById('jdrive').value;
+  updateDriveButton();
+}
+
+function debounceSave() {
+  syncJobMeta();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(persist, 1500);
+}
+
+function saveNow() {
+  saveCurrentJobFromEditor();
+  persist();
+  document.getElementById('last-saved').textContent = new Date().toLocaleTimeString();
+}
+
+// ============================================================
+//  JOBS GRID
+// ============================================================
+function renderJobsGrid() {
+  const grid = document.getElementById('jobs-grid');
+  if (!jobs.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;padding:32px;text-align:center;border:2px dashed var(--mist);background:white;"><div style="font-family:Fraunces,serif;font-size:1.1rem;color:var(--mist);margin-bottom:10px;">No active jobs yet</div><button class="btn btn-p" onclick="openNewJobModal()">⊕ Create First Job</button></div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  grid.innerHTML = jobs.map(j => {
+    const total = j.rows.length;
+    const done = j.rows.filter(r => r.status === 'complete').length;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    const people = [...(j.crew||[]).filter(c=>c.name.trim()), ...(j.subs||[]).filter(s=>s.company.trim())];
+    const colour = j.colour || '';
+
+    // Due date logic
+    let dueHtml = '';
+    if (j.end) {
+      const end = new Date(j.end); end.setHours(0,0,0,0);
+      const diff = Math.round((end - today) / 86400000);
+      if (diff < 0) dueHtml = `<span class="due-warn due-overdue">⚠️ Overdue by ${Math.abs(diff)} day${Math.abs(diff)===1?'':'s'}</span>`;
+      else if (diff <= 7) dueHtml = `<span class="due-warn due-soon">⏰ Due in ${diff} day${diff===1?'':'s'}</span>`;
+      else dueHtml = `<span class="due-warn due-ok">✅ ${diff} days remaining</span>`;
+    }
+
+    // Drive link
+    const driveHtml = j.driveLink ? `<div style="margin-top:6px;margin-bottom:2px;"><a href="${e(j.driveLink)}" target="_blank" onclick="event.stopPropagation()" style="font-size:.65rem;color:#1a56db;text-decoration:none;">📂 Open Drive Folder</a></div>` : '';
+
+    return `<div class="job-card" style="padding-top:${colour?'22px':'18px'};border-top:${colour?`4px solid ${colour}`:'2px solid var(--ink)'};" onclick="openEditor(${j.id})">
+      ${colour ? `<div style="position:absolute;top:0;left:0;right:0;height:4px;background:${colour};"></div>` : ''}
+      <span class="job-card-status" style="background:${colour||'var(--green)'}">Active</span>
+      <div class="job-card-name">${e(j.name||'Unnamed Job')}</div>
+      <div class="job-card-meta">
+        ${j.location ? '📍 '+e(j.location)+'<br>' : ''}
+        ${j.start ? '📅 '+e(j.start) + (j.end ? ' → '+e(j.end) : '') + '<br>' : ''}
+        👤 ${people.length} people · ${total} tasks · ${done} complete
+      </div>
+      ${dueHtml}
+      ${driveHtml}
+      <div class="job-card-progress" style="margin-top:8px;"><div class="job-card-progress-bar" style="width:${pct}%;background:${colour||'var(--green)'}"></div></div>
+      <div class="prog-text">${pct}% complete · ${total - done} remaining</div>
+      <div class="job-card-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-p" style="font-size:.58rem;padding:3px 9px" onclick="openEditor(${j.id})">Open Job</button>
+        <button class="btn" style="font-size:.58rem;padding:3px 9px" onclick="duplicateJob(${j.id})">Duplicate</button>
+        <button class="btn btn-r" style="font-size:.58rem;padding:3px 9px" onclick="markJobComplete(${j.id})">✅ Complete</button>
+        <button class="btn" style="font-size:.58rem;padding:3px 9px;color:var(--rust);border-color:var(--rust)" onclick="deleteJob(${j.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function badges() {
+  document.getElementById('bc-jobs').textContent = jobs.length;
+  document.getElementById('bc-comp').textContent = completedJobs.length;
+  document.getElementById('bc-ct').textContent = contacts.length;
+  document.getElementById('bc-tk').textContent = taskLibrary.length;
+}
+
+// ============================================================
+//  NEW JOB
+// ============================================================
+function openNewJobModal() {
+  const sel = document.getElementById('nj-copy-from');
+  sel.innerHTML = '<option value="">— Start fresh —</option>' + jobs.map(j => `<option value="${j.id}">${e(j.name||'Unnamed')}</option>`).join('');
+  ['nj-name','nj-loc','nj-pm','nj-start','nj-end','nj-drive'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('nj-colour').value = '';
+  renderColourPicker('nj-colour-picker', '', (c) => { document.getElementById('nj-colour').value = c; });
+  document.getElementById('m-newjob').classList.add('open');
+}
+
+function createNewJob() {
+  const name = document.getElementById('nj-name').value.trim();
+  if (!name) return alert('Please enter a job name.');
+  const copyFromId = document.getElementById('nj-copy-from').value;
+  const src = copyFromId ? getJob(parseInt(copyFromId)) : null;
+
+  const newJob = {
+    id: ++jobIdCounter,
+    name,
+    location: document.getElementById('nj-loc').value,
+    pm: document.getElementById('nj-pm').value,
+    start: document.getElementById('nj-start').value,
+    end: document.getElementById('nj-end').value,
+    notes: '',
+    driveLink: document.getElementById('nj-drive').value,
+    colour: document.getElementById('nj-colour').value || '',
+    crew: src ? JSON.parse(JSON.stringify(src.crew)) : [],
+    subs: src ? JSON.parse(JSON.stringify(src.subs)) : [],
+    rows: [],
+    files: [],
+    status: 'active',
+    createdAt: new Date().toLocaleDateString('en-IE')
+  };
+  jobs.push(newJob);
+  cm('m-newjob');
+  persist();
+  renderJobsGrid();
+  badges();
+  openEditor(newJob.id);
+}
+
+function duplicateJob(id) {
+  const j = getJob(id); if (!j) return;
+  const copy = JSON.parse(JSON.stringify(j));
+  copy.id = ++jobIdCounter;
+  copy.name = copy.name + ' (Copy)';
+  copy.createdAt = new Date().toLocaleDateString('en-IE');
+  jobs.push(copy);
+  persist(); renderJobsGrid(); badges();
+}
+
+function deleteJob(id) {
+  if (!confirm('Delete this job permanently?')) return;
+  jobs = jobs.filter(j => j.id !== id);
+  persist(); renderJobsGrid(); badges();
+}
+
+// ============================================================
+//  MARK COMPLETE
+// ============================================================
+function markComplete() {
+  const j = currentJob(); if (!j) return;
+  if (!confirm(`Mark "${j.name||'this job'}" as complete?`)) return;
+  saveCurrentJobFromEditor();
+  markJobComplete(j.id);
+  closeEditor();
+}
+
+function markJobComplete(id) {
+  const idx = jobs.findIndex(j => j.id === id); if (idx === -1) return;
+  const j = JSON.parse(JSON.stringify(jobs[idx]));
+  j.status = 'complete';
+  j.completedAt = new Date().toLocaleDateString('en-IE');
+  completedJobs.unshift(j);
+  jobs.splice(idx, 1);
+  persist(); renderJobsGrid(); badges();
+}
+
+function renderCompleted() {
+  const el = document.getElementById('completed-list');
+  if (!completedJobs.length) { el.innerHTML = '<p style="color:var(--mist);font-size:.78rem;">No completed jobs yet.</p>'; return; }
+  el.innerHTML = completedJobs.map(j => {
+    const total = j.rows.length, done = j.rows.filter(r=>r.status==='complete').length;
+    return `<div class="comp-card">
+      <div class="comp-info">
+        <span class="comp-badge">✅ Complete</span>
+        <div class="comp-name">${e(j.name||'Unnamed')}</div>
+        <div class="comp-meta">${j.location?'📍 '+e(j.location)+' · ':''}${j.start?e(j.start)+' → ':''} ${j.end?e(j.end):''}${j.completedAt?' · Completed '+e(j.completedAt):''} · ${total} tasks</div>
+      </div>
+      <div class="comp-actions">
+        <button class="btn btn-p" style="font-size:.6rem;padding:3px 9px" onclick="reopenJob(${j.id})">↩ Reopen</button>
+        <button class="btn btn-g" style="font-size:.6rem;padding:3px 9px" onclick="viewCompletedJob(${j.id})">View</button>
+        <button class="btn" style="font-size:.6rem;padding:3px 9px;color:var(--rust);border-color:var(--rust)" onclick="deleteCompleted(${j.id})">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function reopenJob(id) {
+  const idx = completedJobs.findIndex(j=>j.id===id); if(idx===-1) return;
+  if(!confirm('Reopen this job and move it back to Active Jobs?')) return;
+  const j = JSON.parse(JSON.stringify(completedJobs[idx]));
+  j.status = 'active'; delete j.completedAt;
+  jobs.push(j); completedJobs.splice(idx,1);
+  persist(); renderCompleted(); renderJobsGrid(); badges();
+}
+
+function viewCompletedJob(id) {
+  // Temporarily add to jobs array so editor can open it
+  const j = completedJobs.find(x=>x.id===id); if(!j) return;
+  if(!jobs.find(x=>x.id===id)) jobs.push(j); // temp add
+  openEditor(id);
+}
+
+function deleteCompleted(id) {
+  if(!confirm('Permanently delete this completed job?')) return;
+  completedJobs = completedJobs.filter(j=>j.id!==id);
+  persist(); renderCompleted(); badges();
+}
+
+// ============================================================
+//  CREW (operates on currentJob().crew)
+// ============================================================
+function addCrew(name='',role='',phone='',email='') {
+  const j = currentJob(); if (!j) return;
+  if (!j.crew) j.crew = [];
+  j.crew.push({ id: ++crewIdCounter, name, role, phone, email });
+  renderCrew(); renderShareOpts(); renderSheets();
+}
+function addSub(company='',contact='',phone='') {
+  const j = currentJob(); if (!j) return;
+  if (!j.subs) j.subs = [];
+  j.subs.push({ id: ++subIdCounter, company, contact, phone });
+  renderSubs(); renderShareOpts(); renderSheets();
+}
+function rmCrew(id) { const j=currentJob();if(!j)return; j.crew=j.crew.filter(c=>c.id!==id); renderCrew();renderShareOpts();renderSheets(); }
+function rmSub(id) { const j=currentJob();if(!j)return; j.subs=j.subs.filter(s=>s.id!==id); renderSubs();renderShareOpts();renderSheets(); }
+
+function renderCrew() {
+  const j = currentJob(); if (!j) return;
+  document.getElementById('crew-cont').innerHTML = (j.crew||[]).map(c => `
+    <div class="crew-card">
+      <button class="xbtn" onclick="rmCrew(${c.id})">×</button>
+      <div class="role-badge">Crew</div>
+      <div class="cf"><label>Name</label><input value="${e(c.name)}" placeholder="Name" oninput="upCrew(${c.id},'name',this.value)" /></div>
+      <div class="cf"><label>Role</label><input value="${e(c.role)}" placeholder="e.g. Site Foreman" oninput="upCrew(${c.id},'role',this.value)" /></div>
+      <div class="cf"><label>Phone</label><input value="${e(c.phone)}" placeholder="+353..." oninput="upCrew(${c.id},'phone',this.value)" /></div>
+      <div class="cf"><label>Email</label><input value="${e(c.email)}" placeholder="email@..." oninput="upCrew(${c.id},'email',this.value)" /></div>
+      <button class="btn" style="font-size:.56rem;padding:2px 7px;margin-top:4px" onclick="saveCrewToContacts(${c.id})">💾 Save to DB</button>
+    </div>`).join('');
+}
+function renderSubs() {
+  const j = currentJob(); if (!j) return;
+  document.getElementById('sub-cont').innerHTML = (j.subs||[]).map(s => `
+    <div class="crew-card" style="border-color:var(--steel)">
+      <button class="xbtn" onclick="rmSub(${s.id})">×</button>
+      <div class="role-badge" style="background:var(--rust)">Sub</div>
+      <div class="cf"><label>Company / Trade</label><input value="${e(s.company)}" placeholder="e.g. Electrician" oninput="upSub(${s.id},'company',this.value)" /></div>
+      <div class="cf"><label>Contact Name</label><input value="${e(s.contact)}" placeholder="Contact person" oninput="upSub(${s.id},'contact',this.value)" /></div>
+      <div class="cf"><label>Phone</label><input value="${e(s.phone)}" placeholder="+353..." oninput="upSub(${s.id},'phone',this.value)" /></div>
+      <button class="btn" style="font-size:.56rem;padding:2px 7px;margin-top:4px" onclick="saveSubToContacts(${s.id})">💾 Save to DB</button>
+    </div>`).join('');
+}
+function upCrew(id,f,v){const j=currentJob();if(!j)return;const c=j.crew.find(x=>x.id===id);if(c){c[f]=v;renderShareOpts();renderSheets();if(f==='name')renderSchedule();debounceSave();}}
+function upSub(id,f,v){const j=currentJob();if(!j)return;const s=j.subs.find(x=>x.id===id);if(s){s[f]=v;renderShareOpts();renderSheets();if(f==='company')renderSchedule();debounceSave();}}
+
+function saveCrewToContacts(id) {
+  const j=currentJob();if(!j)return;
+  const c=j.crew.find(x=>x.id===id);if(!c||!c.name.trim())return alert('Add a name first.');
+  const ex=contacts.find(x=>x.name===c.name&&x.type==='crew');
+  if(ex)Object.assign(ex,{name:c.name,role:c.role,phone:c.phone,email:c.email});
+  else contacts.push({id:++contactIdCounter,type:'crew',name:c.name,role:c.role,phone:c.phone,email:c.email,notes:''});
+  persist();badges();alert(c.name+' saved to Contacts DB.');
+}
+function saveSubToContacts(id) {
+  const j=currentJob();if(!j)return;
+  const s=j.subs.find(x=>x.id===id);if(!s||!s.company.trim())return alert('Add a name first.');
+  const ex=contacts.find(x=>x.name===s.company&&x.type==='sub');
+  if(ex)Object.assign(ex,{name:s.company,role:s.contact,phone:s.phone});
+  else contacts.push({id:++contactIdCounter,type:'sub',name:s.company,role:s.contact,phone:s.phone,email:'',notes:''});
+  persist();badges();alert(s.company+' saved to Contacts DB.');
+}
+
+function allPeople() {
+  const j = currentJob(); if (!j) return [];
+  return [
+    ...(j.crew||[]).filter(c=>c.name.trim()).map(c=>({name:c.name,type:'crew'})),
+    ...(j.subs||[]).filter(s=>s.company.trim()).map(s=>({name:s.company,type:'sub'}))
+  ];
+}
+
+// ============================================================
+//  SCHEDULE
+// ============================================================
+function addScheduleRow(date='',action='',by='',status='pending',notes='') {
+  const j = currentJob(); if (!j) return;
+  let assignees = Array.isArray(by) ? by : (by&&by.trim() ? by.split(/[\/,]/).map(s=>s.trim()).filter(Boolean) : []);
+  j.rows.push({id:++rowIdCounter,date,action,assignees,status,notes});
+  renderSchedule();
+}
+function rmRow(id) { const j=currentJob();if(!j)return; j.rows=j.rows.filter(r=>r.id!==id); renderSchedule(); }
+function upRow(id,f,v) { const j=currentJob();if(!j)return; const r=j.rows.find(x=>x.id===id);if(r)r[f]=v; }
+
+function renderTags(rowId, assignees) {
+  if(!assignees||!assignees.length) return `<span class="aph">Tap to assign…</span>`;
+  return assignees.map(name => {
+    const p = allPeople().find(x=>x.name===name), type = p?p.type:'crew';
+    return `<span class="atag ${type}">${e(name)}<span class="tx" onclick="rmAssignee(${rowId},'${e(name)}',event)">✕</span></span>`;
+  }).join('');
+}
+
+function toggleDrop(rowId,cell) {
+  document.querySelectorAll('.adrop').forEach(d=>d.remove());
+  if(openDrop===rowId){openDrop=null;return;}
+  openDrop=rowId;
+  const j=currentJob(); if(!j) return;
+  const row=j.rows.find(r=>r.id===rowId); if(!row) return;
+  const ppl=allPeople();
+  const crewPpl=ppl.filter(p=>p.type==='crew'),subsPpl=ppl.filter(p=>p.type==='sub');
+  const dd=document.createElement('div');dd.className='adrop';
+  const buildOpts=list=>list.map(p=>{
+    const sel=row.assignees.includes(p.name),col=p.type==='crew'?'var(--steel)':'var(--rust)';
+    return`<div class="dopt ${sel?'sel':''}" onclick="togAssignee(${rowId},'${e(p.name)}')">
+      <span class="dot" style="background:${col}"></span>${e(p.name)}${sel?'<span class="chk">✓</span>':''}
+    </div>`;
+  }).join('');
+  dd.innerHTML=(crewPpl.length?`<div class="dgl">Work Team</div>${buildOpts(crewPpl)}`:'')+
+    (subsPpl.length?`<div class="dgl">Sub-Contractors</div>${buildOpts(subsPpl)}`:'') +
+    (!ppl.length?'<div style="padding:9px 11px;font-size:.71rem;color:var(--mist);">Add crew above first</div>':'');
+  const rect=cell.getBoundingClientRect();
+  dd.style.top=(rect.bottom+2)+'px';dd.style.left=rect.left+'px';
+  document.body.appendChild(dd);
+  setTimeout(()=>{
+    document.addEventListener('click',function cDD(ev){
+      if(!dd.contains(ev.target)&&!cell.contains(ev.target)){dd.remove();openDrop=null;document.removeEventListener('click',cDD);}
+    });
+  },10);
+}
+function togAssignee(rowId,name){
+  const j=currentJob();if(!j)return;
+  const row=j.rows.find(r=>r.id===rowId);if(!row)return;
+  const idx=row.assignees.indexOf(name);
+  if(idx===-1)row.assignees.push(name);else row.assignees.splice(idx,1);
+  const el=document.getElementById('at-'+rowId);if(el)el.innerHTML=renderTags(rowId,row.assignees);
+  const cell=document.getElementById('ac-'+rowId);
+  document.querySelectorAll('.adrop').forEach(d=>d.remove());openDrop=null;
+  if(cell)toggleDrop(rowId,cell);
+  renderSheets();debounceSave();
+}
+function rmAssignee(rowId,name,ev){
+  ev.stopPropagation();
+  const j=currentJob();if(!j)return;
+  const row=j.rows.find(r=>r.id===rowId);if(!row)return;
+  row.assignees=row.assignees.filter(a=>a!==name);
+  const el=document.getElementById('at-'+rowId);if(el)el.innerHTML=renderTags(rowId,row.assignees);
+  renderSheets();debounceSave();
+}
+
+function sc(s){return{pending:'#e2e8f0',inprogress:'#fef3c7',complete:'#d1fae5',blocked:'#fee2e2'}[s]||'#e2e8f0';}
+
+function renderSchedule() {
+  const j=currentJob(); if(!j) return;
+  document.getElementById('sched-body').innerHTML=j.rows.map(r=>`
+    <tr class="${r.status==='complete'?'done-row':''}" id="row-${r.id}">
+      <td class="cd"><input value="${e(r.date)}" placeholder="Date / Time" oninput="upRow(${r.id},'date',this.value);debounceSave()" /></td>
+      <td class="ca"><textarea placeholder="Task..." oninput="upRow(${r.id},'action',this.value);ag(this);debounceSave()">${e(r.action)}</textarea></td>
+      <td class="cb acell" id="ac-${r.id}" onclick="toggleDrop(${r.id},this)" style="cursor:pointer;position:relative;">
+        <div class="atags" id="at-${r.id}">${renderTags(r.id,r.assignees)}</div>
+      </td>
+      <td class="cs" style="background:${sc(r.status)}20;">
+        <select class="ssel" onchange="upRow(${r.id},'status',this.value);renderSchedule();renderJobsGrid();debounceSave()">
+          <option value="pending" ${r.status==='pending'?'selected':''}>⬜ Pending</option>
+          <option value="inprogress" ${r.status==='inprogress'?'selected':''}>🔶 In Progress</option>
+          <option value="complete" ${r.status==='complete'?'selected':''}>✅ Complete</option>
+          <option value="blocked" ${r.status==='blocked'?'selected':''}>🔴 Blocked</option>
+        </select>
+      </td>
+      <td class="cn"><input value="${e(r.notes)}" placeholder="Notes..." oninput="upRow(${r.id},'notes',this.value);debounceSave()" /></td>
+      <td class="cx" style="text-align:center;vertical-align:middle;">
+        <button class="xbtn" style="position:static;padding:2px 6px" onclick="rmRow(${r.id})">×</button>
+      </td>
+    </tr>`).join('');
+  document.querySelectorAll('#sched-body textarea').forEach(t=>ag(t));
+}
+function ag(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+
+// ============================================================
+//  FILES
+// ============================================================
+function openAddFileModal(editId='') {
+  document.getElementById('fe-id').value = editId||'';
+  if (editId) {
+    const j=currentJob(); const f=j.files.find(x=>x.id==editId);
+    if(f){document.getElementById('fe-name').value=f.name;document.getElementById('fe-url').value=f.url;document.getElementById('fe-type').value=f.icon;document.getElementById('fe-notes').value=f.notes||'';}
+  } else {
+    ['fe-name','fe-url','fe-notes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fe-type').value='📐';
+  }
+  document.getElementById('m-file').classList.add('open');
+}
+function saveFile() {
+  const j=currentJob(); if(!j) return;
+  const name=document.getElementById('fe-name').value.trim(); if(!name) return alert('File name required.');
+  const url=document.getElementById('fe-url').value.trim(); if(!url) return alert('URL required.');
+  const editId=document.getElementById('fe-id').value;
+  const data={name,url,icon:document.getElementById('fe-type').value,notes:document.getElementById('fe-notes').value};
+  if(editId){const f=j.files.find(x=>x.id==editId);if(f)Object.assign(f,data);}
+  else{if(!j.files)j.files=[];j.files.push({id:++fileIdCounter,...data});}
+  renderFiles();persist();cm('m-file');
+}
+function renderFiles() {
+  const j=currentJob(); if(!j) return;
+  const el=document.getElementById('files-list');
+  if(!j.files||!j.files.length){el.innerHTML='<div style="padding:14px;font-size:.74rem;color:var(--mist);">No files linked yet. Add Google Drive, Dropbox or any URL links for drawings and documents.</div>';return;}
+  el.innerHTML=j.files.map(f=>`
+    <div class="file-item">
+      <span class="file-icon">${f.icon||'📄'}</span>
+      <div style="flex:1">
+        <div class="file-name"><a href="${e(f.url)}" target="_blank" style="color:var(--ink);text-decoration:none;" onmouseover="this.style.color='var(--rust)'" onmouseout="this.style.color='var(--ink)'">${e(f.name)}</a></div>
+        ${f.notes?`<div class="file-desc">${e(f.notes)}</div>`:''}
+      </div>
+      <div class="file-actions">
+        <button class="btn" style="font-size:.56rem;padding:2px 7px" onclick="window.open('${e(f.url)}','_blank')">Open</button>
+        <button class="btn" style="font-size:.56rem;padding:2px 7px" onclick="openAddFileModal(${f.id})">Edit</button>
+        <button class="btn" style="font-size:.56rem;padding:2px 7px;color:var(--rust);border-color:var(--rust)" onclick="deleteFile(${f.id})">×</button>
+      </div>
+    </div>`).join('');
+}
+function deleteFile(id){
+  const j=currentJob();if(!j)return;
+  j.files=j.files.filter(f=>f.id!==id);renderFiles();persist();
+}
+
+// ============================================================
+//  TASK SHEETS
+// ============================================================
+function renderSheets() {
+  const container=document.getElementById('task-sheets');
+  const ppl=allPeople();
+  if(!ppl.length){container.innerHTML='<p style="font-size:.73rem;color:var(--mist);">Add crew members above to see individual task sheets.</p>';return;}
+  const j=currentJob();if(!j)return;
+  container.innerHTML=ppl.map(person=>{
+    const pr=j.rows.filter(r=>r.assignees&&r.assignees.includes(person.name));
+    const col=person.type==='sub'?'var(--rust)':'var(--steel)';
+    return`<div style="margin-bottom:19px;">
+      <div style="font-family:'Fraunces',serif;font-size:.88rem;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:7px;">
+        <span style="background:${col};color:white;font-family:'DM Mono',monospace;font-size:.54rem;letter-spacing:.15em;text-transform:uppercase;padding:2px 6px;">${person.type==='sub'?'SUB':'CREW'}</span>
+        ${e(person.name)}
+        <span style="font-family:'DM Mono',monospace;font-size:.6rem;color:var(--mist);font-weight:400;">${pr.length} task(s)</span>
+        <button class="btn btn-g" style="font-size:.53rem;padding:2px 7px;margin-left:auto;" onclick="openShareFor('${e(person.name)}')">↗ Share</button>
+        <button class="btn btn-pur" style="font-size:.53rem;padding:2px 7px;" onclick="openContractorLinkFor('${e(person.name)}')">🔗 Contractor Link</button>
+      </div>
+      <table class="sub-tbl">
+        <thead><tr><th style="width:110px">Date</th><th>Task</th><th style="width:110px">Status</th><th style="width:150px">Notes</th></tr></thead>
+        <tbody>${pr.length?pr.map(r=>`<tr>
+          <td><input value="${e(r.date)}" readonly style="color:var(--mist)" /></td>
+          <td><input value="${e(r.action)}" readonly /></td>
+          <td><input value="${r.status.charAt(0).toUpperCase()+r.status.slice(1)}" readonly style="color:var(--mist)" /></td>
+          <td><input value="${e(r.notes)}" placeholder="—" readonly /></td>
+        </tr>`).join(''):`<tr><td colspan="4" style="padding:8px 11px;font-size:.71rem;color:var(--mist);">No tasks assigned yet.</td></tr>`}
+        </tbody>
+      </table>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+//  SHARE TASKS
+// ============================================================
+function openShareModal(){renderShareOpts();document.getElementById('m-share').classList.add('open');document.getElementById('share-pre').textContent='Select a person…';}
+function openShareFor(name){renderShareOpts();document.getElementById('m-share').classList.add('open');document.getElementById('share-sel').value=name;updateSharePre();}
+function renderShareOpts(){
+  const sel=document.getElementById('share-sel');
+  sel.innerHTML='<option value="">-- Select Person --</option>'+allPeople().map(p=>`<option value="${e(p.name)}">${e(p.name)} (${p.type==='sub'?'Sub':'Crew'})</option>`).join('');
+}
+function updateSharePre(){
+  const name=document.getElementById('share-sel').value;
+  const el=document.getElementById('share-pre');
+  if(!name){el.textContent='Select a person…';return;}
+  el.innerHTML=`<div class="spre-title">📋 Task Sheet — ${e(name)}</div><pre style="white-space:pre-wrap;font-family:'DM Mono',monospace;font-size:.7rem;">${shareText(name)}</pre>`;
+}
+function shareText(name){
+  const j=currentJob()||{name:'Job',location:'',start:''};
+  const pr=(j.rows||[]).filter(r=>r.assignees&&r.assignees.includes(name));
+  let t=`JOB SCHEDULE — ${j.name||'Job'}\n`;
+  if(j.location)t+=`Site: ${j.location}\n`;if(j.start)t+=`Start: ${j.start}\n`;
+  t+=`\nHi ${name},\nHere are your scheduled tasks. Please confirm receipt.\n\n${'─'.repeat(50)}\n`;
+  if(!pr.length)t+=`No tasks currently assigned to you.\n`;
+  else pr.forEach(r=>{t+=`\n📅 ${r.date}\n   Task: ${r.action}\n`;if(r.notes)t+=`   Notes: ${r.notes}\n`;t+=`   Status: ${r.status.charAt(0).toUpperCase()+r.status.slice(1)}\n`;});
+  t+=`\n${'─'.repeat(50)}\nContact the Project Manager for queries.\n`;
+  return t;
+}
+function copyShare(){const n=document.getElementById('share-sel').value;if(!n)return alert('Select first.');navigator.clipboard.writeText(shareText(n)).then(()=>alert('Copied!'));}
+function emailShare(){const n=document.getElementById('share-sel').value;if(!n)return alert('Select first.');const c=contacts.find(x=>x.name===n);window.open(`mailto:${c?c.email:''}?subject=${encodeURIComponent('Your Tasks — '+(currentJob()||{}).name||'Job')}&body=${encodeURIComponent(shareText(n))}`);}
+function waShare(){const n=document.getElementById('share-sel').value;if(!n)return alert('Select first.');window.open('https://wa.me/?text='+encodeURIComponent(shareText(n)));}
+
+// ============================================================
+//  CONTRACTOR LINK
+// ============================================================
+function openContractorLink() { openContractorLinkFor(''); }
+function openContractorLinkFor(name) {
+  renderShareOpts();
+  const sel = document.getElementById('cv-person-sel');
+  sel.innerHTML = '<option value="">-- Select Person --</option>' + allPeople().map(p=>`<option value="${e(p.name)}">${e(p.name)}</option>`).join('');
+  if (name) sel.value = name;
+  updateContractorLink();
+  document.getElementById('m-contractor').classList.add('open');
+}
+function updateContractorLink() {
+  const name = document.getElementById('cv-person-sel').value;
+  const urlEl = document.getElementById('cv-link-url');
+  const countEl = document.getElementById('cv-task-count');
+  if (!name) { urlEl.textContent = 'Select a person above…'; countEl.textContent = ''; return; }
+  const j = currentJob(); if (!j) return;
+  const tasks = j.rows.filter(r=>r.assignees&&r.assignees.includes(name));
+  const payload = { v:1, jobId:j.id, jobName:j.name, personName:name,
+    tasks: tasks.map(r=>({id:r.id,date:r.date,action:r.action,status:r.status,notes:r.notes}))
+  };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const base = window.location.href.split('?')[0];
+  const url = base + '?contractor=' + encoded;
+  urlEl.textContent = url;
+  countEl.textContent = `${tasks.length} task(s) assigned to ${name}`;
+}
+function copyContractorLink(){
+  const url=document.getElementById('cv-link-url').textContent;
+  if(!url||url.includes('Select'))return alert('Select a person first.');
+  navigator.clipboard.writeText(url).then(()=>alert('Contractor link copied!'));
+}
+function waContractorLink(){
+  const url=document.getElementById('cv-link-url').textContent;
+  const n=document.getElementById('cv-person-sel').value;
+  const j=currentJob();
+  window.open('https://wa.me/?text='+encodeURIComponent(`Hi ${n},\nHere are your tasks for ${j?j.name:'the job'}.\nOpen this link to view and tick off your tasks:\n${url}`));
+}
+function emailContractorLink(){
+  const url=document.getElementById('cv-link-url').textContent;
+  const n=document.getElementById('cv-person-sel').value;
+  const j=currentJob();
+  window.open(`mailto:?subject=${encodeURIComponent('Your Tasks — '+(j?j.name:'Job'))}&body=${encodeURIComponent(`Hi ${n},\n\nHere are your tasks for ${j?j.name:'the job'}.\n\nOpen this link to view and tick off your tasks:\n${url}\n\nRegards,\nKDL Retail Interiors`)}`);
+}
+
+// ============================================================
+//  CONTRACTOR VIEW (opened from ?contractor= URL)
+// ============================================================
+let cvPayload = null;
+let cvCompletions = {};
+
+function loadContractorView(encoded) {
+  try {
+    const json = decodeURIComponent(escape(atob(encoded)));
+    cvPayload = JSON.parse(json);
+  } catch(e) { document.body.innerHTML='<div style="padding:40px;font-family:monospace;">Invalid contractor link.</div>'; return; }
+
+  // Hide main app, show contractor view
+  document.querySelector('.header').style.display = 'none';
+  document.querySelector('.nav-tabs').style.display = 'none';
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+  document.querySelector('.footer-tip').style.display = 'none';
+  document.getElementById('contractor-view').style.display = 'block';
+
+  document.getElementById('cv-job-info').textContent = `Job: ${cvPayload.jobName||'—'}`;
+  document.getElementById('cv-name-banner').textContent = `📋 Tasks for: ${cvPayload.personName}`;
+
+  // Init completions
+  cvPayload.tasks.forEach(t => { cvCompletions[t.id] = t.status === 'complete'; });
+  renderCVTasks();
+}
+
+function renderCVTasks() {
+  const el = document.getElementById('cv-tasks-list');
+  if (!cvPayload || !cvPayload.tasks.length) { el.innerHTML='<p style="color:var(--mist)">No tasks found.</p>'; return; }
+  el.innerHTML = cvPayload.tasks.map(t => {
+    const done = cvCompletions[t.id];
+    return `<div class="cv-task ${done?'done':''}" id="cvt-${t.id}">
+      <div class="cv-tick ${done?'ticked':''}" onclick="cvToggle(${t.id})">
+        ${done?'✓':''}
+      </div>
+      <div class="cv-info">
+        <div class="cv-date">📅 ${e(t.date||'—')}</div>
+        <div class="cv-task-txt" style="${done?'text-decoration:line-through;color:var(--mist)':''}">${e(t.action)}</div>
+        ${t.notes?`<div class="cv-notes">📝 ${e(t.notes)}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function cvToggle(id) {
+  cvCompletions[id] = !cvCompletions[id];
+  renderCVTasks();
+}
+
+function buildCVUpdateLink() {
+  const updates = cvPayload.tasks.map(t => ({
+    id: t.id, status: cvCompletions[t.id] ? 'complete' : 'pending'
+  }));
+  const payload = { v:1, jobId:cvPayload.jobId, personName:cvPayload.personName, updates };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  return window.location.href.split('?')[0] + '?update=' + encoded;
+}
+
+function cvCopyLink() {
+  navigator.clipboard.writeText(buildCVUpdateLink()).then(()=>alert('Update link copied! Send this to your project manager.'));
+}
+function cvWhatsApp() {
+  const msg = `Hi, I've updated my task completions for ${cvPayload.jobName}.\nHere is my update link — please click to sync:\n${buildCVUpdateLink()}`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg));
+}
+function cvEmail() {
+  window.open(`mailto:?subject=${encodeURIComponent('Task Updates — '+cvPayload.jobName)}&body=${encodeURIComponent('Hi,\n\nHere are my task updates for '+cvPayload.jobName+'.\n\nClick this link to sync the completions:\n'+buildCVUpdateLink()+'\n\nRegards,\n'+cvPayload.personName)}`);
+}
+
+// Apply contractor update (when PM opens ?update= link)
+function applyContractorUpdate(encoded) {
+  try {
+    const json = decodeURIComponent(escape(atob(encoded)));
+    const payload = JSON.parse(json);
+    const j = jobs.find(x=>x.id===payload.jobId);
+    if (!j) { alert('Job not found. Make sure you are opening this link on the same device/browser where the job is saved.'); return; }
+    let count = 0;
+    payload.updates.forEach(u => {
+      const row = j.rows.find(r=>r.id===u.id);
+      if (row && u.status === 'complete') { row.status = 'complete'; count++; }
+    });
+    persist();
+    alert(`✅ ${count} task(s) marked complete from ${payload.personName}'s update.\n\nOpening the job now…`);
+    window.history.replaceState({}, '', window.location.pathname);
+    openEditor(j.id);
+    renderJobsGrid();
+  } catch(err) {
+    alert('Could not apply update. Invalid or expired link.');
+  }
+}
+
+// ============================================================
+//  SHARE JOB LINK
+// ============================================================
+function openShareLink() {
+  const j = currentJob(); if (!j) return;
+  saveCurrentJobFromEditor();
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({v:3, job:j}))));
+  const base = window.location.href.split('?')[0];
+  const url = base + '?job=' + encoded;
+  document.getElementById('share-link-url').textContent = url;
+  const kb = Math.round(encoded.length/1024*10)/10;
+  document.getElementById('share-link-size').textContent = `Link size: ~${kb} KB`;
+  document.getElementById('m-sharelink').classList.add('open');
+}
+function copyShareLink(){
+  const url=document.getElementById('share-link-url').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=document.getElementById('copy-link-btn');btn.textContent='✓ Copied!';
+    setTimeout(()=>btn.textContent='📋 Copy Link',2000);
+  });
+}
+function waShareLink(){const url=document.getElementById('share-link-url').textContent;const j=currentJob();window.open('https://wa.me/?text='+encodeURIComponent(`KDL JobPlanner — ${j?j.name:'Job'}\nOpen this link to view the full schedule:\n${url}`));}
+function emailShareLink(){const url=document.getElementById('share-link-url').textContent;const j=currentJob();window.open(`mailto:?subject=${encodeURIComponent('Job Schedule — '+(j?j.name:'Job'))}&body=${encodeURIComponent('Hi,\n\nHere is the full job schedule:\n'+url+'\n\nRegards,\nKDL Retail Interiors')}`);}
+
+function checkURLImport(jobParam) {
+  try {
+    const json = decodeURIComponent(escape(atob(jobParam)));
+    const payload = JSON.parse(json);
+    if (!payload || !payload.job) return;
+    const importedJob = payload.job;
+    importedJob.id = ++jobIdCounter;
+    importedJob.status = 'active';
+    jobs.push(importedJob);
+    persist(); renderJobsGrid(); badges();
+    const banner = document.getElementById('import-banner');
+    document.getElementById('import-banner-name').textContent = `"${importedJob.name}"`;
+    banner.style.display = 'flex';
+    window.history.replaceState({}, '', window.location.pathname);
+    openEditor(importedJob.id);
+  } catch(err) { console.warn('URL import failed', err); }
+}
+
+// ============================================================
+//  ADD FROM CONTACTS
+// ============================================================
+function openAddFromDB(type) {
+  const fromDBtype_local = type;
+  window._fromDBtype = type;
+  document.getElementById('m-fromdb-title').textContent = type==='crew'?'Add Crew from Contacts':'Add Subs from Contacts';
+  const list = contacts.filter(c=>c.type===type);
+  if (!list.length) { alert('No '+type+' contacts in the database yet.\nAdd them via the Contacts DB tab first, or use "💾 Save to DB" on any crew card.'); return; }
+  document.getElementById('fromdb-list').innerHTML = list.map(c=>`
+    <label style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-bottom:1px solid var(--cream);cursor:pointer;">
+      <input type="checkbox" data-id="${c.id}" style="width:auto" />
+      <span><strong style="font-size:.8rem">${e(c.name)}</strong>
+      <span style="font-size:.7rem;color:var(--mist);margin-left:7px">${e(c.role||'')} ${c.phone?'· '+e(c.phone):''}</span></span>
+    </label>`).join('');
+  document.getElementById('m-fromdb').classList.add('open');
+}
+function confirmFromDB() {
+  const type = window._fromDBtype;
+  const j = currentJob(); if (!j) return;
+  document.querySelectorAll('#fromdb-list input:checked').forEach(cb => {
+    const c = contacts.find(x=>x.id==cb.dataset.id); if(!c) return;
+    if (type==='crew') { if (!j.crew.find(x=>x.name===c.name)) { j.crew.push({id:++crewIdCounter,name:c.name,role:c.role,phone:c.phone,email:c.email}); } }
+    else { if (!j.subs.find(x=>x.company===c.name)) { j.subs.push({id:++subIdCounter,company:c.name,contact:c.role,phone:c.phone}); } }
+  });
+  cm('m-fromdb'); renderCrew(); renderSubs(); renderShareOpts(); renderSheets(); persist();
+}
+
+// ============================================================
+//  CONTACTS DB
+// ============================================================
+function openContactModal(type,editId) {
+  document.getElementById('ct-type').value=type;document.getElementById('ct-id').value=editId||'';
+  document.getElementById('m-contact-title').textContent=editId?'Edit Contact':(type==='crew'?'Add Crew Contact':'Add Sub-Contractor');
+  if(editId){const c=contacts.find(x=>x.id==editId);if(c){document.getElementById('ct-name').value=c.name;document.getElementById('ct-role').value=c.role||'';document.getElementById('ct-phone').value=c.phone||'';document.getElementById('ct-email').value=c.email||'';document.getElementById('ct-notes').value=c.notes||'';}}
+  else{['ct-name','ct-role','ct-phone','ct-email','ct-notes'].forEach(id=>document.getElementById(id).value='');}
+  document.getElementById('m-contact').classList.add('open');
+}
+function saveContact(){
+  const type=document.getElementById('ct-type').value,editId=document.getElementById('ct-id').value;
+  const name=document.getElementById('ct-name').value.trim();if(!name)return alert('Name required.');
+  const data={type,name,role:document.getElementById('ct-role').value,phone:document.getElementById('ct-phone').value,email:document.getElementById('ct-email').value,notes:document.getElementById('ct-notes').value};
+  if(editId){const c=contacts.find(x=>x.id==editId);if(c)Object.assign(c,data);}
+  else contacts.push({id:++contactIdCounter,...data});
+  persist();renderContacts();badges();cm('m-contact');
+}
+function renderContacts(){
+  const q=(document.getElementById('csearch').value||'').toLowerCase();
+  const crewList=contacts.filter(c=>c.type==='crew'&&(!q||c.name.toLowerCase().includes(q)||(c.role||'').toLowerCase().includes(q)));
+  const subList=contacts.filter(c=>c.type==='sub'&&(!q||c.name.toLowerCase().includes(q)||(c.role||'').toLowerCase().includes(q)));
+  const card=c=>`<div class="dbc">
+    <span class="dbb" style="background:${c.type==='crew'?'var(--steel)':'var(--rust)'}">${c.type==='crew'?'Crew':'Sub'}</span>
+    <div class="dbn">${e(c.name)}</div>
+    <div class="dbd">${e(c.role||'—')}</div>
+    <div class="dbd">📞 ${e(c.phone||'—')}</div>
+    <div class="dbd">✉ ${e(c.email||'—')}</div>
+    ${c.notes?`<div class="dbd" style="color:var(--mist)">${e(c.notes)}</div>`:''}
+    <div class="dba">
+      <button class="btn" style="font-size:.56rem;padding:2px 7px" onclick="addContactToJob(${c.id})">+ Add to Job</button>
+      <button class="btn" style="font-size:.56rem;padding:2px 7px" onclick="openContactModal('${c.type}','${c.id}')">Edit</button>
+      <button class="btn" style="font-size:.56rem;padding:2px 7px;color:var(--rust);border-color:var(--rust)" onclick="delContact(${c.id})">Del</button>
+    </div>
+  </div>`;
+  document.getElementById('db-crew').innerHTML=crewList.length?`<div class="db-grid">${crewList.map(card).join('')}</div>`:'<p style="font-size:.74rem;color:var(--mist);">No crew contacts yet.</p>';
+  document.getElementById('db-sub').innerHTML=subList.length?`<div class="db-grid">${subList.map(card).join('')}</div>`:'<p style="font-size:.74rem;color:var(--mist);">No sub-contractor contacts yet.</p>';
+}
+function addContactToJob(id){
+  const c=contacts.find(x=>x.id===id);if(!c)return;
+  if(!currentJobId){alert('Open a job first to add contacts to it.');return;}
+  const j=currentJob();
+  if(c.type==='crew'){if(j.crew.find(x=>x.name===c.name))return alert(c.name+' already on this job.');j.crew.push({id:++crewIdCounter,name:c.name,role:c.role,phone:c.phone,email:c.email});}
+  else{if(j.subs.find(x=>x.company===c.name))return alert(c.name+' already on this job.');j.subs.push({id:++subIdCounter,company:c.name,contact:c.role,phone:c.phone});}
+  persist();alert(c.name+' added to current job.');
+}
+function delContact(id){if(!confirm('Delete this contact?'))return;contacts=contacts.filter(c=>c.id!==id);persist();renderContacts();badges();}
+
+// ============================================================
+//  TASK LIBRARY
+// ============================================================
+function getCats(){return['ALL',...[...new Set(taskLibrary.map(t=>t.category||'General'))].sort()];}
+function catCol(cat){return{'Electrical':'#2c5f8a','Demo':'#8b3a1a','Fit-Out':'#2d6a4f','Flooring':'#6b4f12','Shop Staff':'#4a5568','Snagging':'#7b2d8b','Finishing':'#a85c26','General':'#888'}[cat]||'#555';}
+
+function openTaskModal(editId){
+  document.getElementById('te-id').value=editId||'';
+  document.getElementById('m-task-title').textContent=editId?'Edit Task':'Add Task to Library';
+  if(editId){const t=taskLibrary.find(x=>x.id==editId);if(t){document.getElementById('te-desc').value=t.desc;document.getElementById('te-cat').value=t.category||'';document.getElementById('te-ass').value=t.defaultAssignee||'';}}
+  else{['te-desc','te-cat','te-ass'].forEach(id=>document.getElementById(id).value='');}
+  document.getElementById('cat-dl').innerHTML=getCats().filter(c=>c!=='ALL').map(c=>`<option value="${e(c)}">`).join('');
+  document.getElementById('m-task').classList.add('open');
+}
+function saveTask(){
+  const desc=document.getElementById('te-desc').value.trim();if(!desc)return alert('Description required.');
+  const cat=document.getElementById('te-cat').value.trim()||'General';
+  const ass=document.getElementById('te-ass').value.trim();
+  const editId=document.getElementById('te-id').value;
+  if(editId){const t=taskLibrary.find(x=>x.id==editId);if(t){t.desc=desc;t.category=cat;t.defaultAssignee=ass;}}
+  else taskLibrary.push({id:++taskIdCounter,desc,category:cat,defaultAssignee:ass});
+  persist();renderTaskLib();badges();cm('m-task');
+}
+function renderTaskLib(activeCat){
+  if(activeCat!==undefined)libCat=activeCat;
+  const q=(document.getElementById('tsearch').value||'').toLowerCase();
+  const cats=getCats();
+  document.getElementById('lib-cats').innerHTML=cats.map(c=>`<button class="cat-chip ${libCat===c?'on':''}" onclick="renderTaskLib('${e(c)}')">${e(c)}</button>`).join('');
+  const fil=taskLibrary.filter(t=>(libCat==='ALL'||t.category===libCat)&&(!q||t.desc.toLowerCase().includes(q)||(t.category||'').toLowerCase().includes(q)));
+  document.getElementById('lib-list').innerHTML=fil.length?fil.map(t=>`
+    <div class="tli">
+      <span class="tli-cat" style="background:${catCol(t.category||'General')}">${e(t.category||'General')}</span>
+      <span class="tli-txt">${e(t.desc)}</span>
+      ${t.defaultAssignee?`<span style="font-size:.6rem;color:var(--mist)">${e(t.defaultAssignee)}</span>`:''}
+      <button class="btn" style="font-size:.54rem;padding:2px 7px" onclick="openTaskModal(${t.id})">Edit</button>
+      <button class="btn" style="font-size:.54rem;padding:2px 7px;color:var(--rust);border-color:var(--rust)" onclick="delTask(${t.id})">Del</button>
+    </div>`).join(''):'<div style="padding:12px;font-size:.74rem;color:var(--mist);">No tasks found.</div>';
+}
+function delTask(id){if(!confirm('Delete this task?'))return;taskLibrary=taskLibrary.filter(t=>t.id!==id);persist();renderTaskLib();badges();}
+
+function openTaskPicker(){
+  pickerCat='ALL';renderPicker();
+  document.getElementById('m-picker').classList.add('open');
+}
+function renderPicker(activeCat){
+  if(activeCat!==undefined)pickerCat=activeCat;
+  const cats=getCats();
+  document.getElementById('picker-cats').innerHTML=cats.map(c=>`<button class="cat-chip ${pickerCat===c?'on':''}" onclick="renderPicker('${e(c)}')">${e(c)}</button>`).join('');
+  const fil=taskLibrary.filter(t=>pickerCat==='ALL'||t.category===pickerCat);
+  document.getElementById('picker-list').innerHTML=fil.map(t=>`
+    <div class="tli" onclick="addFromLib(${t.id},this)">
+      <span class="tli-cat" style="background:${catCol(t.category||'General')}">${e(t.category||'General')}</span>
+      <span class="tli-txt">${e(t.desc)}</span>
+      ${t.defaultAssignee?`<span style="font-size:.6rem;color:var(--mist)">${e(t.defaultAssignee)}</span>`:''}
+      <span class="tli-add">+ Add</span>
+    </div>`).join('')||'<div style="padding:12px;font-size:.74rem;color:var(--mist);">No tasks.</div>';
+}
+function addFromLib(id,el){
+  const t=taskLibrary.find(x=>x.id===id);if(!t)return;
+  addScheduleRow('',t.desc,t.defaultAssignee||'','pending','');
+  const add=el.querySelector('.tli-add');
+  if(add){add.textContent='✓ Added';add.style.color='var(--green)';setTimeout(()=>{add.textContent='+ Add';add.style.color='';},1200);}
+}
+
+function seedTasks(){
+  const s=[
+    ['Alarm pic and panic buttons disabled','Electrical','Electrician'],
+    ['All electrics disconnected and made safe','Electrical','Electrician'],
+    ['Electrical 1st fix','Electrical','Electrician'],
+    ['Electrical install — dado trunking, temp counter wired','Electrical','Electrician'],
+    ['Computers checked before handover','Electrical','Electrician'],
+    ['Demo and clear out','Demo','KDL'],
+    ['Remove units and prep for install','Demo','KDL'],
+    ['Commence install of new units','Fit-Out','KDL'],
+    ['C/R build to commence','Fit-Out','KDL'],
+    ['Counter installation before shop opens','Fit-Out','KDL'],
+    ['Snags / alterations / extras','Snagging','KDL'],
+    ['Graphics / painting if applicable','Finishing','KDL'],
+    ['Flooring install — prep and screed','Flooring','MJ Flooring'],
+    ['Floor install phase 2','Flooring','MJ Flooring'],
+    ['Area to be emptied and cleared','Shop Staff','Shop Staff'],
+    ['Disp to be completely cleared by 6pm','Shop Staff','Shop Staff'],
+    ['Shop handed over for restocking','Shop Staff','Shop Staff'],
+  ];
+  s.forEach(t=>taskLibrary.push({id:++taskIdCounter,desc:t[0],category:t[1],defaultAssignee:t[2]}));
+}
+
+// ============================================================
+//  SAVE / LOAD
+// ============================================================
+function persist(){
+  try{
+    localStorage.setItem('kdl3_jobs',JSON.stringify({jobs,jobIdCounter,rowIdCounter,crewIdCounter,subIdCounter,fileIdCounter}));
+    localStorage.setItem('kdl3_completed',JSON.stringify({completedJobs}));
+    localStorage.setItem('kdl3_contacts',JSON.stringify({contacts,contactIdCounter}));
+    localStorage.setItem('kdl3_tasks',JSON.stringify({taskLibrary,taskIdCounter}));
+    document.getElementById('last-saved').textContent=new Date().toLocaleTimeString();
+  }catch(err){console.warn('Save error',err);}
+}
+function loadAll(){
+  try{const d=JSON.parse(localStorage.getItem('kdl3_jobs')||'null');if(d){jobs=d.jobs||[];jobIdCounter=d.jobIdCounter||0;rowIdCounter=d.rowIdCounter||0;crewIdCounter=d.crewIdCounter||0;subIdCounter=d.subIdCounter||0;fileIdCounter=d.fileIdCounter||0;jobs.forEach(j=>{if(!j.files)j.files=[];j.rows=(j.rows||[]).map(r=>{if(!r.assignees)r.assignees=(r.by||'').split(/[\/,]/).map(s=>s.trim()).filter(Boolean);return r;});});}}catch(e){}
+  try{const d=JSON.parse(localStorage.getItem('kdl3_completed')||'null');if(d){completedJobs=d.completedJobs||[];}}catch(e){}
+  try{const d=JSON.parse(localStorage.getItem('kdl3_contacts')||'null');if(d){contacts=d.contacts||[];contactIdCounter=d.contactIdCounter||0;}}catch(e){}
+  try{const d=JSON.parse(localStorage.getItem('kdl3_tasks')||'null');if(d){taskLibrary=d.taskLibrary||[];taskIdCounter=d.taskIdCounter||0;}}catch(e){}
+}
+
+// ============================================================
+//  COLOUR PICKER & DRIVE HELPERS
+// ============================================================
+const JOB_COLOURS = [
+  {hex:'', label:'None'},
+  {hex:'#c0392b', label:'Red'},
+  {hex:'#e67e22', label:'Orange'},
+  {hex:'#f1c40f', label:'Yellow'},
+  {hex:'#2d6a4f', label:'Green'},
+  {hex:'#2980b9', label:'Blue'},
+  {hex:'#8e44ad', label:'Purple'},
+  {hex:'#1a1a2e', label:'Black'},
+  {hex:'#c9a84c', label:'Gold'},
+  {hex:'#4a5568', label:'Steel'},
+];
+
+function renderColourPicker(containerId, selectedHex, onSelect) {
+  const el = document.getElementById(containerId); if (!el) return;
+  el.innerHTML = JOB_COLOURS.map(c => `
+    <div class="colour-swatch ${selectedHex===c.hex?'selected':''}"
+      style="background:${c.hex||'#fff'};border-color:${c.hex?'transparent':'#ccc'};"
+      data-hex="${c.hex}"
+      title="${c.label}"
+      onclick="colourSwatchClick('${containerId}','${c.hex}')">
+      ${!c.hex?'<span style="font-size:.65rem;color:#aaa;line-height:18px;display:block;text-align:center;">✕</span>':''}
+    </div>`).join('');
+  el._onSelect = onSelect;
+}
+
+function colourSwatchClick(containerId, hex) {
+  const el = document.getElementById(containerId); if (!el) return;
+  el.querySelectorAll('.colour-swatch').forEach(s => {
+    s.classList.toggle('selected', s.dataset.hex === hex);
+  });
+  if (el._onSelect) el._onSelect(hex);
+}
+
+function updateDriveButton() {
+  const val = (document.getElementById('jdrive')||{}).value || '';
+  const btn = document.getElementById('jdrive-open');
+  const link = document.getElementById('jdrive-link');
+  if (!btn || !link) return;
+  if (val.trim()) {
+    btn.style.display = 'block';
+    link.href = val.trim();
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+// ============================================================
+//  UTILS
+// ============================================================
+function cm(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.mo').forEach(m=>{m.addEventListener('click',ev=>{if(ev.target===m)m.classList.remove('open');});});
+function e(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+</script>
+</body>
+</html>
